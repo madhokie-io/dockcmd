@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   build:
     name: Build
-    runs-on: "ubuntu-latest"
+    runs-on: "blacksmith-2vcpu-ubuntu-2404"
     permissions:
       id-token: write
       packages: write
@@ -11,7 +11,7 @@ jobs:
       attestations: write
       actions: read
     steps:
-      - uses: code-cargo/cargowall-action@v1
+      - uses: code-cargo/cargowall-action@v1.3.7
         with:
           mode: 'audit'
           api-url: 'https://app.dev.codecargo.dev'
