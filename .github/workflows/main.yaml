@@ -11,9 +11,11 @@ jobs:
       attestations: write
       actions: read
     steps:
-      - uses: code-cargo/cargowall-action@v1.3.7
+      - uses: code-cargo/cargowall-action@7fec72e659fe8783582eb5da84fe6c68d4ec7c64
         with:
           api-url: 'https://app.dev.codecargo.dev'
+          container-egress: enforce
+          tls-sni: enforce-pinned
 
       - name: Checkout
         uses: actions/checkout@v6
