@@ -1,0 +1,57 @@
+name: cargowall-verifier-budget
+
+# Measures how many instructions the kernel's BPF verifier processes for each
+# cargowall program on THIS runner's kernel. The count is kernel-specific:
+# Blacksmith's 6.6 rejects cg_origin_egress at the 1M limit while the 6.17
+# kernel cargowall's own CI runs on verifies it in ~700k
+# (code-cargo/cargowall#138). Nothing is attached or enforced here; the job
+# only loads the programs with verifier stats and writes a table to the job
+# summary. Fails when any program does not load.
+on:
+  workflow_dispatch:
+    inputs:
+      cargowall_ref:
+        description: code-cargo/cargowall git ref to measure
+        # TODO: switch to main once code-cargo/cargowall's verifier-budget
+        # tool (scripts/ci/verifierbudget) has merged.
+        default: matt/verifier-budget
+      runner:
+        description: runner label — this picks the kernel under test
+        default: blacksmith-2vcpu-ubuntu-2404
+  pull_request:
+    paths:
+      - .github/workflows/cargowall-verifier-budget.yml
+
+jobs:
+  measure:
+    name: verifier budget on ${{ inputs.runner || 'blacksmith-2vcpu-ubuntu-2404' }}
+    runs-on: ${{ inputs.runner || 'blacksmith-2vcpu-ubuntu-2404' }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout cargowall
+        uses: actions/checkout@v6
+        with:
+          repository: code-cargo/cargowall
+          ref: ${{ inputs.cargowall_ref || 'matt/verifier-budget' }}
+          path: cargowall
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: cargowall/go.mod
+          cache-dependency-path: cargowall/go.sum
+
+      - name: Kernel under test
+        run: |
+          uname -r
+          grep -m1 -E 'PRETTY_NAME' /etc/os-release || true
+
+      - name: Build the measuring tool
+        working-directory: cargowall
+        run: go build -o "$RUNNER_TEMP/verifierbudget" ./scripts/ci/verifierbudget
+
+      # Root is needed to load BPF programs; --preserve-env keeps the step
+      # summary path so the table lands on the run page.
+      - name: Measure
+        run: sudo --preserve-env=GITHUB_STEP_SUMMARY "$RUNNER_TEMP/verifierbudget"
