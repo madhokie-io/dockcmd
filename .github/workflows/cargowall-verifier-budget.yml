@@ -12,9 +12,7 @@ on:
     inputs:
       cargowall_ref:
         description: code-cargo/cargowall git ref to measure
-        # TODO: switch to main once TestVerifierBudget (code-cargo/cargowall
-        # PR #139) has merged.
-        default: matt/verifier-budget
+        default: main
       runner:
         description: runner label — this picks the kernel under test
         default: blacksmith-2vcpu-ubuntu-2404
@@ -34,7 +32,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: code-cargo/cargowall
-          ref: ${{ inputs.cargowall_ref || 'matt/verifier-budget' }}
+          ref: ${{ inputs.cargowall_ref || 'main' }}
           path: cargowall
 
       - uses: actions/setup-go@v6
