@@ -3,13 +3,18 @@ on: [push, pull_request]
 jobs:
   build:
     name: Build
-    runs-on: "ubuntu-latest"
+    runs-on: "blacksmith-2vcpu-ubuntu-2404"
     permissions:
       id-token: write
       packages: write
       contents: write
       attestations: write
+      actions: read
     steps:
+      - uses: code-cargo/cargowall-action@f3518be3b920aa33dd0c1fecad3b9a99bf8b00aa
+        with:
+          container-egress: enforce
+          tls-sni: enforce-pinned
 
       - name: Checkout
         uses: actions/checkout@v6
