@@ -11,7 +11,7 @@ jobs:
       attestations: write
       actions: read
     steps:
-      - uses: code-cargo/cargowall-action@26aec383085c2e0ce11fdebc2f5d942bcc43db25
+      - uses: code-cargo/cargowall-action@f3518be3b920aa33dd0c1fecad3b9a99bf8b00aa
         with:
           container-egress: enforce
           tls-sni: enforce-pinned
